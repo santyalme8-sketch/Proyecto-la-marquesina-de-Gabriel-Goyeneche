@@ -29,6 +29,7 @@ private:
     public:
     Yuuko();
     void activarPanico();
+    float getVelocidad();
 };
 
 class Goyoneche : public Persona {
@@ -36,6 +37,7 @@ private:
     bool agenteia;
     public:
         Goyoneche();
+    float getVelocidad();
     void ejecutar();
 };
 
@@ -45,14 +47,14 @@ protected:
     bool destructible;
 
     public:
-    Obstaculo();
+    Obstaculo(int v, bool dest, float vel, float acel);
 };
 class Proyectil : public Obstaculo {
 private:
     float tamaño;
     float daño;
     public:
-             Proyectil();
+             Proyectil(float tam, float d, float vel);
     void actualizar();
 };
 
@@ -61,6 +63,6 @@ private:
     float longitud;
 
     public:
-    Viga();
+    Viga(float len);
 };
 #endif // CLASES_H
