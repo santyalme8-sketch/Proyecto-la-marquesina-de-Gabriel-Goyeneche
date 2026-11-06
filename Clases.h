@@ -3,11 +3,11 @@
 
 class Cuerpo {
 protected:
-    float peso;
     float velocidad;
     float aceleracion;
     public:
     Cuerpo();
+    Cuerpo(float velocidad, float aceleracion);
 };
 class Persona : public Cuerpo {
 protected:
@@ -15,16 +15,19 @@ protected:
     bool estado;
 
     public:
-             Persona();
-    void recibirDanio(int cantidad);
+    Persona();
+    Persona(int salud,float velocidad,float aceleracion);
+    int recibirDaño(int cantidad);
+    int getPuntosDeSalud();
+    bool getEstado();
 };
 
 class Yuuko : public Persona {
 private:
-    bool modoPanico;
+    bool modoPanico=false;
 
     public:
-    Yuuko(int salud = 100);
+    Yuuko();
     void activarPanico();
 };
 
