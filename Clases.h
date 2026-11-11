@@ -7,19 +7,22 @@ protected:
     float aceleracion;
     public:
     Cuerpo();
-    Cuerpo(float velocidad, float aceleracion);
+        Cuerpo(float velocidad, float aceleracion);
 };
 class Persona : public Cuerpo {
 protected:
     int puntosDeSalud;
     bool estado;
-
+    float posicionx;
+    float posiciony;
     public:
     Persona();
     Persona(int salud,float velocidad,float aceleracion);
     int recibirDaño(int cantidad);
     int getPuntosDeSalud();
     bool getEstado();
+    void setposicionx(float posx);
+    void setposiciony(float posy);
 };
 
 class Yuuko : public Persona {
@@ -30,6 +33,8 @@ private:
     Yuuko();
     void activarPanico();
     float getVelocidad();
+    float getposicionx(){return this->posicionx;}
+    float getposiciony(){return this->posiciony;}
 };
 
 class Goyoneche : public Persona {
@@ -54,8 +59,9 @@ private:
     float tamaño;
     float daño;
     public:
-             Proyectil(float tam, float d, float vel);
+     Proyectil(float tam, float d, float vel);
     void actualizar();
+    float getvelocidad();
 };
 
 class Viga : public Obstaculo {

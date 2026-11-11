@@ -1,5 +1,6 @@
 #include "Clases.h"
 #include "iostream"
+
 Cuerpo::Cuerpo(float velocidad, float aceleracion){
     this->velocidad=velocidad;
     this->aceleracion=aceleracion;
@@ -25,6 +26,8 @@ bool Persona::getEstado()  {
     return estado; }
 
 Yuuko::Yuuko() : Persona(100,18.5f,5.0f) {
+    setposicionx(0.0f);
+    setposiciony(0.0f);
 }
 
 
@@ -49,6 +52,18 @@ Proyectil::Proyectil(float tam, float d, float vel): Obstaculo(1, true, vel, 0.0
     this->tamaño=tam;
     this->daño=d;
 }
+float Proyectil::getvelocidad(){
+    return velocidad;
+}
+
 Viga::Viga(float len): Obstaculo(999, false, 0.0f, 0.0f){
     this->longitud=len;
+}
+
+
+void Persona::setposicionx(float posx){
+    this->posicionx=posx;
+}
+void Persona::setposiciony(float posy){
+    this->posicionx=posy;
 }
