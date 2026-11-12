@@ -1,11 +1,9 @@
 #include "Clases.h"
 #include "iostream"
 
-Cuerpo::Cuerpo(float velocidad, float aceleracion){
-    this->velocidad=velocidad;
-    this->aceleracion=aceleracion;
-}
-Persona::Persona(int salud,float velo,float ace): Cuerpo(velo, ace) {
+Cuerpo::Cuerpo(float vx, float vy, float ax, float ay)
+    : vx(vx), vy(vy), ax(ax), ay(ay) {}
+Persona::Persona(int salud, float vx, float vy, float ax, float ay): Cuerpo(vx, vy, ax, ay), puntosDeSalud(salud), estado(true), posicionx(0.0f) {
     this->puntosDeSalud = salud;
     this->estado = true;
 }
@@ -35,35 +33,28 @@ Goyoneche::Goyoneche(): Persona(150,12.0f,3.0f){
 
 }
 
-float Goyoneche::getVelocidad(){
-    return velocidad;
-}
+
 void Yuuko::activarPanico() {
     modoPanico = true;
-    velocidad *= 1.5f;
-    std::cout << "Yuuko entro en Panico. Velocidad aumentada a: " << velocidad << "\n";
+    vx *= 1.5f;
+    std::cout << "Yuuko entro en Panico. Velocidad aumentada a: " << vx << "\n";
 }
-float Yuuko::getVelocidad(){
-    return velocidad;
-}
-Obstaculo::Obstaculo(int v, bool dest, float vel, float acel) : Cuerpo(vel, acel), vida(v), destructible(dest) {}
 
-Proyectil::Proyectil(float tam, float d, float vel): Obstaculo(1, true, vel, 0.0f){
-    this->tamaño=tam;
-    this->daño=d;
-}
-float Proyectil::getvelocidad(){
-    return velocidad;
-}
+
+Obstaculo::Obstaculo(int v, bool dest, float vx, float vy, float ax, float ay): Cuerpo(vx, vy, ax, ay), vida(v), destructible(dest) {}
+
+Proyectil::Proyectil(float tam, float d, float vx, float vy)
+    : Obstaculo(1, true, vx, vy), tamaño(tam), daño(d) {}
+
+
 
 Viga::Viga(float len): Obstaculo(999, false, 0.0f, 0.0f){
     this->longitud=len;
 }
 
-
 void Persona::setposicionx(float posx){
     this->posicionx=posx;
 }
 void Persona::setposiciony(float posy){
-    this->posicionx=posy;
+    this->posiciony=posy;
 }
