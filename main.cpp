@@ -2,14 +2,20 @@
 
 #include "Clases.h"
 float  calcularposicionx(float x0, float vx0, float tiempo, float aceleracion ){
-    return vx0*tiempo+((aceleracion)*(tiempo*tiempo))/2;
+    return x0+vx0*tiempo+((aceleracion)*(tiempo*tiempo))/2;
 }
 float calcularposiciony(float y0, float vy0, float t){
-    return vy0-((9.8)*(t*t))/2;
+    return y0+vy0-((9.8)*(t*t))/2;
+}
+float momentolineal(float m1, float v1, float m2, float v2, float elasticidad) {
+    return (m1 * v1 + m2 * v2 + m1 * elasticidad * (v1 - v2)) / (m1 + m2);
+}
+float rebotarpared(float velocidad, float elasticidad) {
+    return -velocidad * elasticidad;
 }
 int main()
 {
-     float duracion_total = 2.0f; // 2 segundos reales
+     float duracion_total = 2.0f;
      float fps = 60.0f;
      float dt = 1.0f / fps;
      int total_pasos=duracion_total/dt;
