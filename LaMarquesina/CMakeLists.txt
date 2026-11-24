@@ -14,6 +14,10 @@ find_package(Qt6 REQUIRED COMPONENTS Widgets Multimedia)
 qt_add_executable(LaMarquesina
     main.cpp
     Juego.h Juego.cpp
+    Cuerpo.h Cuerpo.cpp
+    Persona.h Persona.cpp
+    Obstaculos.h Obstaculos.cpp
+
 )
 
 target_link_libraries(LaMarquesina PRIVATE Qt6::Widgets Qt6::Multimedia)
