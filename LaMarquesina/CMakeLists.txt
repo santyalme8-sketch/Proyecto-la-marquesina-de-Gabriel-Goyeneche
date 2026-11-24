@@ -17,6 +17,7 @@ qt_add_executable(LaMarquesina
     Cuerpo.h Cuerpo.cpp
     Persona.h Persona.cpp
     Obstaculos.h Obstaculos.cpp
+    Tiposagente.h Tiposagente.cpp
 
 )
 
