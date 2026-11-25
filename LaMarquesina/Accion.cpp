@@ -27,7 +27,7 @@ DatosDisparo Accion::disparar(const Decision& d, float origenX, float origenY) {
     p.y0 = origenY;
     p.gravedad = gravedad;
     p.vx = (d.objetivoX - origenX) / T;
-    p.vy = (d.objetivoY - 0.5f *gravedad * T * T) / T;
+    p.vy = (d.objetivoY - origenY - 0.5f * gravedad * T * T) / T;
     return p;
 }
 
