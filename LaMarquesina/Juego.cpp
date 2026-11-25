@@ -1,22 +1,131 @@
 #include "Juego.h"
 #include <QGraphicsTextItem>
 #include <QFont>
+#include <QMessageBox>
+//include #include "Nivel1.h"
+//include #include "Nivel2.h"
 
-Juego::Juego(QWidget* parent) : QGraphicsView(parent) {
-    // 'this' es el padre, cuando se cierra la ventana, qt borra la escena
+Juego::Juego(QWidget* parent) :
+    QGraphicsView(parent), nivel(nullptr), dificultdad(ConfigDificultad::NORMAL()), nombreDificultdad("NORMAL"), pantalla(0) {
+    //la escena es el "mundo", la vista (this) es la camara que lo muestra
     escena = new QGraphicsScene(0,0, ANCHO, ALTO, this);
     setScene(escena);
     setFixedSize(ANCHO + 2, ALTO + 2);
     setHorizontalScrollBarPolicy(Qt::ScrollBarAlwaysOff);
     setVerticalScrollBarPolicy(Qt::ScrollBarAlwaysOff);
-    escena -> setBackgroundBrush(QColor(30, 30, 50));
-
-    QGraphicsTextItem* texto = escena ->addText("Hola Yuuko!", QFont("TimesNewRoman", 40, QFont::Bold));
-    texto -> setDefaultTextColor(Qt::white);
-    texto ->setPos(450, 300);
-    //un rectangulo se crea en 0,0 y despues se mueve con setPos
-    QGraphicsRectItem* cuadro = escena -> addRect(0, 0, 32, 48, QPen(Qt::NoPen), QBrush(QColor(255, 150, 190)));
-    cuadro -> setPos(620, 450);
+    setRenderHint(QPainter::Antialiasing);
 
 
+    sonidos = new Sonidos();
+
+//game loop cada 16ms (unos 60 fps) se llama a paso()
+    reloj = new QTimer(this);
+    connect(reloj, &QTimer::timeout, this, &Juego::paso);
+    reloj->start(16);
+    cronometro.start();
+
+    mostrarMenu();
+}
+
+Juego::~Juego() {
+    delete nivel;
+    delete sonidos;
+
+}
+
+void Juego::mostrarMenu() {
+    delete nivel;
+    nivel = nullptr;
+    escena->clear(); //borra y libera los items de la escena
+    escena->setSceneRect(0, 0, ANCHO, ALTO);
+    escena->setBackgroundBrush(QColor(30, 30, 50));
+    sonidos->detenerMusica();
+    pantalla = 0;
+
+    QGraphicsTextItem* titulo = escena ->addText("Yuuko vs. La marquesina de Goyenehe (*ˊᗜˋ*)", QFont("TimesNewRoman", 32, QFont::Bold));
+    titulo -> setDefaultTextColor(Qt::white);
+    titulo ->setPos(250, 150);
+
+    QGraphicsTextItem* opciones = escena ->addText(
+    "1 - Nivel 1: La gran Marquesina sobre Monserrate\n"
+    "2  -  Nivel 2: Ataque a las Nubes desde la Plaza\n"
+    "F / N / D / S  -  Dificultad: " + nombreDificultdad + "\n\n"
+    "Controles: A/D o flechas para moverse, W o Espacio para saltar,\n"
+    "Q para llamar a la mala suerte, Esc para volver al menu",QFont("TimesNewRoman", 18));
+    opciones->setDefaultTextColor(Qt::white);
+    opciones->setPos(200, 260);
+
+}
+
+void Juego::iniciarNivel(int numero) {
+    delete nivel;
+    nivel = nullptr;
+    escena->clear();
+    teclas.clear();
+// if (numero ==1) nivel = new Nivel1(escena, teclas, sonidos, dificultdad);
+// else nivel = new Nivel2(escena, teclas, sonidos);
+
+    if (!nivel) { mostrarMenu(); return;}
+
+    try {
+        nivel->construir();
+    }   catch (const std::exception& e) {
+        //si algo falla al aramr el nivel, se avisa y se vuelve al menu
+        QMessageBox::critical(this, "ERROR AL CARGAR EL NIVEL", e.what());
+        mostrarMenu();
+        return;
+    }
+    pantalla = numero;
+    sonidos->musicaDeFondo("");
+    cronometro.restart();
+
+}
+
+void Juego::mostrarFin(bool gano) {
+    pantalla = -1;
+                sonidos->detenerMusica();
+    QString texto = gano ? "Felicidades, has ganado el juego! ＼(≧▽≦)／"
+                         : "Perdiste... No pudiste contra Goyeneche (╥﹏╥)";
+    QGraphicsTextItem* t = escena->addText(texto + "\n\nPresiona la tecla Enter para volver al menu! (づ￣ ³￣)づ", QFont("TimesNewRoman", 28, QFont::Bold));
+    t->setDefaultTextColor(gano ? Qt::green : Qt::red);
+    t->setPos(escena->sceneRect().left() + 180, 280);
+    t->setZValue(100); //encima de tdoo
+}
+
+void Juego::paso() {
+    float dt = cronometro.restart() / 1000.0f; //segundos reales desde  el frame anterior
+    if (dt > 0.05f) dt = 0.05f; //por si la ventana se congela
+
+    if(pantalla <= 0 || !nivel) return;
+    nivel->actualizar(dt);
+    if (nivel->terminado()) mostrarFin(nivel->gano());
+
+}
+
+void Juego::keyPressEvent(QKeyEvent* e) {
+    if (e->isAutoRepeat()) return; //ignora la peticion si se deja presionado el boton
+    int k = e->key();
+    teclas.insert(k);
+    if (pantalla == 0) { //en el menu
+        if (k == Qt::Key_1) iniciarNivel(1);
+        if (k ==Qt::Key_2) iniciarNivel(2);
+        if (k ==Qt::Key_F) { dificultdad = ConfigDificultad::FACIL();
+            nombreDificultdad = "FACIL"; mostrarMenu(); }
+        if (k ==Qt::Key_N) { dificultdad = ConfigDificultad::NORMAL();
+            nombreDificultdad = "NORMAL"; mostrarMenu(); }
+        if (k ==Qt::Key_D) { dificultdad = ConfigDificultad::DIFICIL();
+            nombreDificultdad = "DIFICIL"; mostrarMenu(); }
+        if (k ==Qt::Key_S) { dificultdad = ConfigDificultad::SUPERULTRA();
+            nombreDificultdad = "SUPER ULTRA GREAT DELICIOUS WONDERFUL YABAI! (つ≧▽≦)つ"; mostrarMenu(); }
+    } else if (pantalla == -1) { //pantalla final
+        if (k == Qt::Key_Return || k == Qt::Key_Enter) mostrarMenu();
+    } else if (nivel) { //jugando
+        if (k == Qt::Key_Escape) { mostrarMenu(); return; }
+        nivel->teclaPresionada(k);
+    }
+}
+
+void Juego::keyReleaseEvent(QKeyEvent* e) {
+    if (e->isAutoRepeat()) return;
+    teclas.remove(e->key());
 }
