@@ -24,7 +24,15 @@ qt_add_executable(LaMarquesina
     Razonamiento.h Razonamiento.cpp
     Accion.h Accion.cpp
     AgenteGoyeneche.h AgenteGoyeneche.cpp
+    Goyeneche.h Goyeneche.cpp
+    Sonidos.h Sonidos.cpp
+    Nivel.h
 
+)
+
+target_sources(LaMarquesina
+    PRIVATE
+        recursos.qrc
 )
 
 target_link_libraries(LaMarquesina PRIVATE Qt6::Widgets Qt6::Multimedia)
