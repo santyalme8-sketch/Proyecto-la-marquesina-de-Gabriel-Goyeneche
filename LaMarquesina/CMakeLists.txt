@@ -19,6 +19,11 @@ qt_add_executable(LaMarquesina
     Obstaculos.h Obstaculos.cpp
     TiposAgente.h TiposAgente.cpp
     Yuuko.h Yuuko.cpp
+    Percepcion.h Percepcion.cpp
+    Aprendizaje.h Aprendizaje.cpp
+    Razonamiento.h Razonamiento.cpp
+    Accion.h Accion.cpp
+    AgenteGoyeneche.h AgenteGoyeneche.cpp
 
 )
 

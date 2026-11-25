@@ -27,10 +27,10 @@ struct LecturaYuuko {
 //resumen que la percepcion le entrega al razonamiento
 struct Observacion {
     LecturaYuuko actual;  //ultima lectura
-    float velPromX = 0, veloPromY = 0; //velocidad promedio reciente
+    float velPromX = 0, velPromY = 0; //velocidad promedio reciente
     float rapidez = 0; //cuantas lecturas recientes estaba saltando
     bool valida = false; //false si todavia no hay lecturas
-
+    int saltosRecientes = 0;
 };
 
 //decision que sale del razonamiento
