@@ -1,7 +1,7 @@
 #ifndef ACCION_H
 #define ACCION_H
 
-#include "Tiposagente.h"
+#include "TiposAgente.h"
 
 //la accion convierte la decision en un disparo real
 //usa un tiro parabolico al reves, sabiendo de donde sale y a donde llega

@@ -1,7 +1,7 @@
 #ifndef AGENTEGOYENECHE_H
 #define AGENTEGOYENECHE_H
 
-#include "Tiposagente.h"
+#include "TiposAgente.h"
 #include "Aprendizaje.h"
 #include "Accion.h"
 #include "Razonamiento.h"

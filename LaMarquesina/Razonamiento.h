@@ -2,7 +2,7 @@
 #define RAZONAMIENTO_H
 
 #include <random>
-#include "Tiposagente.h"
+#include "TiposAgente.h"
 #include "Aprendizaje.h"
 
 //razonamiento: mira la observacion y los pesos aprendidos

@@ -2,7 +2,7 @@
 #define PERCEPCION_H
 
 #include <deque>
-#include "Tiposagente.h"
+#include "TiposAgente.h"
 
 //la percepcion hace que cada cierto tiempo lee la posicion, velocidad y estado de yuuko,
 //luego guarda las ultimas lecturas para calcular promedios

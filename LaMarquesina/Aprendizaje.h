@@ -3,7 +3,7 @@
 
 #include <deque>
 #include <map>
-#include "Tiposagente.h"
+#include "TiposAgente.h"
 
 //lo que guarda de cada ataque
 struct RegistroAtaque {

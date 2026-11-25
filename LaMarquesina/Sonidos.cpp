@@ -3,7 +3,7 @@
 
 Sonidos::Sonidos() {
  //el "qrc:/" es el archivo que esta dentro del ejecutable en recursos.qrc
-    salto.setSource("");
- golpe.setSource("");
-
-     ;}
+    salto.setSource(QUrl());
+    golpe.setSource(QUrl());
+    musica.setAudioOutput(&salida);
+}
