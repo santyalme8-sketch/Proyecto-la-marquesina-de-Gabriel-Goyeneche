@@ -27,6 +27,7 @@ qt_add_executable(LaMarquesina
     Goyeneche.h Goyeneche.cpp
     Sonidos.h Sonidos.cpp
     Nivel.h
+    Nivel1.h Nivel1.cpp
 
 )
 
