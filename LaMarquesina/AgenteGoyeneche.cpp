@@ -1,9 +1,8 @@
 #include "AgenteGoyeneche.h"
 
-AgenteGoyeneche::AgenteGoyeneche (const ConfigDificultad& config, unsigned semilla)
-    : config(config), tiempoDesdeDisparo(0) {
+AgenteGoyeneche::AgenteGoyeneche (const ConfigDificultad& config) : config(config), tiempoDesdeDisparo(0) {
     percepcion = new Percepcion(config.intervaloPercepcion);
-    razonamiento = new Razonamiento(config.errorPrediccion, config.usaAprendizaje, semilla);
+    razonamiento = new Razonamiento(config.errorPrediccion, config.usaAprendizaje);
     accion = new Accion();
     aprendizaje = new Aprendizaje(config.tasaAprendizaje);
 
@@ -17,13 +16,11 @@ AgenteGoyeneche::~AgenteGoyeneche(){
 
 }
 
-bool AgenteGoyeneche::actualizar(float dt, const LecturaYuuko& yuuko,
-                                 float posGoyX, float posGoyY, DatosDisparo& disparo)
+bool AgenteGoyeneche::actualizar(float dt, LecturaYuuko yuuko, float posGoyX, float posGoyY, DatosDisparo& disparo)
 
 {
-    //percepcion
     percepcion->percibir(dt, yuuko);
-    //ya hay que disparar?
+
    tiempoDesdeDisparo  += dt;
     if (tiempoDesdeDisparo < config.intervaloDisparo) return false;
 
@@ -31,26 +28,24 @@ bool AgenteGoyeneche::actualizar(float dt, const LecturaYuuko& yuuko,
     if (!obs.valida) return false;
     tiempoDesdeDisparo = 0;
 
-
-    //razonamiento
     Decision d = razonamiento -> decidir(obs, *aprendizaje, posGoyX, posGoyY);
 
-    //accion
     disparo = accion-> disparar (d, posGoyX, posGoyY);
     disparosPendientes[disparo.id] = disparo.tactica;
     return true;
 
 }
 
-void AgenteGoyeneche::notificarResultado(int idDisparo, bool acerto, bool yuukoSalto)
-{
-    auto it = disparosPendientes.find(idDisparo);
-    if (it == disparosPendientes.end()) return; //id desconocido se ignora
+void AgenteGoyeneche::notificarResultado(int idDisparo, bool acerto, bool yuukoSalto) {
 
-    //aprendizaje
-
-    aprendizaje ->registrar({idDisparo, it->second, acerto, yuukoSalto});
-    disparosPendientes.erase(it);
+    if (disparosPendientes.count(idDisparo) == 0) return;
+    RegistroAtaque r;
+    r.id = idDisparo;
+    r.tactica = disparosPendientes[idDisparo];
+    r.acerto = acerto;
+    r.yuukoSalto = yuukoSalto;
+    aprendizaje->registrar(r);
+    disparosPendientes.erase(idDisparo);
 }
 
 void AgenteGoyeneche::reiniciar() {

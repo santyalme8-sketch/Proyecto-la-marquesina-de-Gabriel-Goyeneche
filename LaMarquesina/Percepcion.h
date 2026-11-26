@@ -4,24 +4,17 @@
 #include <deque>
 #include "TiposAgente.h"
 
-//la percepcion hace que cada cierto tiempo lee la posicion, velocidad y estado de yuuko,
-//luego guarda las ultimas lecturas para calcular promedios
-
 class Percepcion {
 
 private:
-    std::deque<LecturaYuuko> lecturas; //deque se usa para meter atras y sacar adelant
+    std::deque<LecturaYuuko> lecturas;
     int maxLecturas;
-    float intervalo; //segundos entre cada lectura
-        float acumulado; //tiempo desde la ultima lectura\
+    float intervalo;
+        float acumulado;
 
 public:
         Percepcion(float intervalo, int maxLecturas = 5);
-    //se llama en cada frame y devuelve true si tomo una lectura nueva
-
-        bool percibir(float dt, const LecturaYuuko&lectura);
-        //resume las lecturas guardadsa para el razonamiento;
-
+       bool percibir(float dt, const LecturaYuuko&lectura);
         Observacion observar() const;
         void reiniciar();
 

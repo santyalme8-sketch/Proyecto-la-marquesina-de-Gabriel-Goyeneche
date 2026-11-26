@@ -7,7 +7,6 @@
 
 Juego::Juego(QWidget* parent) :
     QGraphicsView(parent), nivel(nullptr), dificultdad(ConfigDificultad::NORMAL()), nombreDificultdad("NORMAL"), pantalla(0) {
-    //la escena es el "mundo", la vista (this) es la camara que lo muestra
     escena = new QGraphicsScene(0,0, ANCHO, ALTO, this);
     setScene(escena);
     setFixedSize(ANCHO + 2, ALTO + 2);
@@ -17,13 +16,9 @@ Juego::Juego(QWidget* parent) :
 
 
     sonidos = new Sonidos();
-
-//game loop cada 16ms (unos 60 fps) se llama a paso()
     reloj = new QTimer(this);
     connect(reloj, &QTimer::timeout, this, &Juego::paso);
     reloj->start(16);
-    cronometro.start();
-
     mostrarMenu();
 }
 
@@ -36,7 +31,7 @@ Juego::~Juego() {
 void Juego::mostrarMenu() {
     delete nivel;
     nivel = nullptr;
-    escena->clear(); //borra y libera los items de la escena
+    escena->clear();
     escena->setSceneRect(0, 0, ANCHO, ALTO);
     escena->setBackgroundBrush(QColor(30, 30, 50));
     sonidos->detenerMusica();
@@ -62,22 +57,17 @@ void Juego::iniciarNivel(int numero) {
     nivel = nullptr;
     escena->clear();
     teclas.clear();
-// if (numero ==1) nivel = new Nivel1(escena, teclas, sonidos, dificultdad);
-// else nivel = new Nivel2(escena, teclas, sonidos);
-
     if (!nivel) { mostrarMenu(); return;}
 
     try {
         nivel->construir();
     }   catch (const std::exception& e) {
-        //si algo falla al aramr el nivel, se avisa y se vuelve al menu
         QMessageBox::critical(this, "ERROR AL CARGAR EL NIVEL", e.what());
         mostrarMenu();
         return;
     }
     pantalla = numero;
     sonidos->musicaDeFondo("");
-    cronometro.restart();
 
 }
 
@@ -89,12 +79,12 @@ void Juego::mostrarFin(bool gano) {
     QGraphicsTextItem* t = escena->addText(texto + "\n\nPresiona la tecla Enter para volver al menu! (づ￣ ³￣)づ", QFont("TimesNewRoman", 28, QFont::Bold));
     t->setDefaultTextColor(gano ? Qt::green : Qt::red);
     t->setPos(escena->sceneRect().left() + 180, 280);
-    t->setZValue(100); //encima de tdoo
+    t->setZValue(100);
 }
 
 void Juego::paso() {
-    float dt = cronometro.restart() / 1000.0f; //segundos reales desde  el frame anterior
-    if (dt > 0.05f) dt = 0.05f; //por si la ventana se congela
+    float dt = 0.016;
+    if (dt > 0.05f) dt = 0.05f;
 
     if(pantalla <= 0 || !nivel) return;
     nivel->actualizar(dt);
@@ -103,10 +93,10 @@ void Juego::paso() {
 }
 
 void Juego::keyPressEvent(QKeyEvent* e) {
-    if (e->isAutoRepeat()) return; //ignora la peticion si se deja presionado el boton
+    if (e->isAutoRepeat()) return;
     int k = e->key();
     teclas.insert(k);
-    if (pantalla == 0) { //en el menu
+    if (pantalla == 0) {
         if (k == Qt::Key_1) iniciarNivel(1);
         if (k ==Qt::Key_2) iniciarNivel(2);
         if (k ==Qt::Key_F) { dificultdad = ConfigDificultad::FACIL();
@@ -117,9 +107,9 @@ void Juego::keyPressEvent(QKeyEvent* e) {
             nombreDificultdad = "DIFICIL"; mostrarMenu(); }
         if (k ==Qt::Key_S) { dificultdad = ConfigDificultad::SUPERULTRA();
             nombreDificultdad = "SUPER ULTRA GREAT DELICIOUS WONDERFUL YABAI! (つ≧▽≦)つ"; mostrarMenu(); }
-    } else if (pantalla == -1) { //pantalla final
+    } else if (pantalla == -1) {
         if (k == Qt::Key_Return || k == Qt::Key_Enter) mostrarMenu();
-    } else if (nivel) { //jugando
+    } else if (nivel) {
         if (k == Qt::Key_Escape) { mostrarMenu(); return; }
         nivel->teclaPresionada(k);
     }

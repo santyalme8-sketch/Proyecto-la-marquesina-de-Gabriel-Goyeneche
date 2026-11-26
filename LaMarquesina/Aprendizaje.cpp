@@ -1,8 +1,5 @@
 #include "Aprendizaje.h"
-#include <algorithm>
 #include <stdexcept>
-
-//deberia añadir un easteregg? (￣▽￣)ノ
 
 Aprendizaje::Aprendizaje(float tasa, int maxHistorial)
     : maxHistorial(maxHistorial), tasa(tasa) {
@@ -15,33 +12,32 @@ Aprendizaje::Aprendizaje(float tasa, int maxHistorial)
 void Aprendizaje::registrar(const RegistroAtaque& r) {
     historial.push_back(r);
     if ((int)historial.size() > maxHistorial)
-        historial.pop_front(); //solo recuerda los ultimos n
+        historial.pop_front();
     recalcularPesos();
 }
 
-//los pesos se calculan desde 0 con el historial actual
-//asi lo viejo se olvida solo cuando sale de la ventana de 10
+float limitar(float valor) {
+    if (valor < 0.1f) return 0.1f;
+    if (valor > 5.0f) return 5.0f;
+    return valor;
+
+}
+
 void Aprendizaje::recalcularPesos() {
     pesos[Tactica::Directo] = 1.0f;
      pesos[Tactica::Predictivo] = 1.0f;
      pesos[Tactica::Aereo] = 1.0f;
 
-     for (const RegistroAtaque& r : historial) {
-         if (r.acerto) {
-             pesos [r.tactica] += tasa; //lo que funciona se repite
-
-         } else {
-             pesos [r.tactica] -= tasa * 0.5f; //lo que falla se usa menos
-             //regla: si esquivo un tiro rasante saltando
-             //el tiro aereo se vuelve mas atractivo
-             if (r.yuukoSalto && r.tactica != Tactica::Aereo)
-                 pesos [Tactica::Aereo]+= tasa;
-         }
-     }
-     //ningun peso baja de 0.1 para que nunca deje de usar una tactica
-     for (auto&par : pesos)
-         par.second = std::clamp(par.second, 0.1f, 5.0f);
-
+     for (int i = 0; i < historial.size(); i++) {
+              RegistroAtaque r = historial[i];
+              if (r.acerto) {
+                  pesos[r.tactica] += tasa;
+              } else {
+                  pesos[r.tactica] -= tasa * 0.5f;
+                  if (r.yuukoSalto && r.tactica != Tactica::Aereo)
+                      pesos [Tactica::Aereo] += tasa;
+              }
+          }
 
 }
 

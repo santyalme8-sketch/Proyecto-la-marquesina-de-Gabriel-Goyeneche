@@ -5,13 +5,11 @@
 #include <QMediaPlayer>
 #include <QAudioOutput>
 
-//agrupa todos los sonidos del juego en un solo lugar
-
 class Sonidos {
 private:
-    QSoundEffect salto, golpe, explosion, logro; //efectos cortos de extesion .wav
-    QMediaPlayer musica; //musica larga
-    QAudioOutput salida; //por donde suena la musica
+    QSoundEffect salto, golpe, explosion, logro;
+    QMediaPlayer musica;
+    QAudioOutput salida;
 
 public:
     enum Efecto {Salto, Golpe, Explosion, Logro};
@@ -23,7 +21,3 @@ public:
 };
 
 #endif // SONIDOS_H
-
-
-//Se me ocurrio que pude haber heco un timelapse de todo el desarrollo pero ya pa que XD
-
