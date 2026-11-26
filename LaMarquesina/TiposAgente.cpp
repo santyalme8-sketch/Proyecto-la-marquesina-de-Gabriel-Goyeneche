@@ -41,9 +41,9 @@ ConfigDificultad ConfigDificultad::DIFICIL() {
 // SUPER ULTRA GREAT DELICIOUS WONDERFUL YABAI!: SUPER ULTRA GREAT DELICIOUS WONDERFUL YABAI!
 ConfigDificultad ConfigDificultad::SUPERULTRA() {
     ConfigDificultad c;
-    c.intervaloPercepcion = 0.5f;
-    c.intervaloDisparo = 0.8f;
-    c.tasaAprendizaje = 0.5f;
+    c.intervaloPercepcion = 0.1f;
+    c.intervaloDisparo = 0.1f;
+    c.tasaAprendizaje = 0.1f;
     c.errorPrediccion = 0.0f;
     c.usaAprendizaje = true;
     return c;

@@ -3,7 +3,7 @@
 #include <QFont>
 #include <QMessageBox>
 #include "Nivel1.h"
-//#include "Nivel2.h"
+#include "Nivel2.h"
 
 Juego::Juego(QWidget* parent) :
     QGraphicsView(parent), nivel(nullptr), dificultdad(ConfigDificultad::NORMAL()), nombreDificultdad("NORMAL"), pantalla(0) {
@@ -58,7 +58,7 @@ void Juego::iniciarNivel(int numero) {
     escena->clear();
     teclas.clear();
     if (numero == 1) nivel = new Nivel1(escena, &teclas, sonidos, dificultdad);
-    if (!nivel) { mostrarMenu(); return;}
+    else nivel = new Nivel2(escena, &teclas, sonidos);
 
     try {
         nivel->construir();

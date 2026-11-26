@@ -28,6 +28,7 @@ qt_add_executable(LaMarquesina
     Sonidos.h Sonidos.cpp
     Nivel.h
     Nivel1.h Nivel1.cpp
+    Nivel2.h Nivel2.cpp
 
 )
 

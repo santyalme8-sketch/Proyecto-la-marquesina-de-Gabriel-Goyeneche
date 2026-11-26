@@ -1,1 +1,7 @@
-<RCC/>
+<RCC>
+    <qresource prefix="/">
+        <file>sprites/yuuko.png</file>
+        <file>sprites/goyeneche.png</file>
+        <file>sprites/tensor.png</file>
+    </qresource>
+</RCC>

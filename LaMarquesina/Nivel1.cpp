@@ -3,6 +3,8 @@
 #include <QBrush>
 #include <QFont>
 #include <cstdlib>
+#include <QPixmap>
+#include <stdexcept>
 
 const float GRAVEDAD = 1400;
 const float VEL_SALTO = 650;
@@ -73,7 +75,7 @@ void Nivel1::construir(){
     }
 
     yuuko = new Yuuko(40,680 - ALTO_YUUKO);
-    dibujoYuuko = escena->addRect(0,0, ANCHO_YUUKO, ALTO_YUUKO, QPen(Qt::NoPen), QBrush(QColor(225,150,190)));
+    dibujoYuuko = escena->addRect(0,0, ANCHO_YUUKO, ALTO_YUUKO, QPen(Qt::NoPen), QBrush(QColor(225,150, 190)));
     dibujoYuuko->setZValue(10);
     goyeneche = new Goyeneche(616,40,450, dificultad);
     dibujoGoyeneche = escena->addRect(0,0,48,48, QPen(Qt::NoPen), QBrush(QColor(90, 60, 40)));
@@ -84,6 +86,12 @@ void Nivel1::construir(){
     textoInfo = escena->addText("", QFont("Consolas", 12));
     textoInfo->setPos(20,42);
     textoInfo->setZValue(20);
+
+    QPixmap imgYuuko(":/sprites/yuuko.png");
+    if (imgYuuko.isNull())
+        throw std::runtime_error("No se encontro el sprite");
+    dibujoYuuko->setBrush(QBrush(imgYuuko.scaled(ANCHO_YUUKO, ALTO_YUUKO, Qt::IgnoreAspectRatio,  Qt::SmoothTransformation)));
+
 }
 
 void Nivel1::teclaPresionada(int tecla) {
@@ -107,6 +115,7 @@ void Nivel1::actualizar(float dt) {
     if (tiempoMensaje > 0) tiempoMensaje -= dt;
     moverYuuko(dt);
     actualizarGoyeneche(dt);
+    actualizarBalas(dt);
     actualizarLaminas(dt);
     revisarTensores();
     actualizarTexto();
@@ -172,19 +181,139 @@ for (int i = 0; i < plataformas.size(); i++) {
 if (yuuko->getX() > ANCHO - ANCHO_YUUKO) yuuko->setPosicion(ANCHO - ANCHO_YUUKO, yuuko->getY());
 
 dibujoYuuko->setPos(yuuko->getX(), yuuko->getY());
-if (yuuko->aturdida()) dibujoYuuko->setBrush(QColor(150, 150, 150));
- else if (yuuko->enPanico()) dibujoYuuko->setBrush(QColor(255, 40, 40));
- else dibujoYuuko->setBrush(QColor(255, 150, 190));
+if (yuuko->aturdida()) dibujoYuuko->setPen(QPen(QColor(150, 150, 150), 3));
+else if (yuuko->enPanico()) dibujoYuuko->setPen(QPen(QColor(255, 40, 40), 3));
+else dibujoYuuko->setPen(QPen(Qt::NoPen));
 }
 
 
 
 
-void Nivel1::actualizarGoyeneche(float dt) {}
-void Nivel1::actualizarBalas(float dt) {}
-void Nivel1::actualizarLaminas(float dt) {}
-void Nivel1::revisarTensores() {}
-void Nivel1::actualizarTexto() {}
+void Nivel1::actualizarGoyeneche(float dt){
+
+    goyeneche->actualizar(dt);
+    dibujoGoyeneche->setPos(goyeneche->getX(), goyeneche->getY());
+    LecturaYuuko lectura;
+    lectura.x = yuuko->getX() + ANCHO_YUUKO / 2;
+    lectura.y = yuuko->getY() + ALTO_YUUKO / 2;
+    lectura.vx = yuuko->getVx();
+    lectura.vy = yuuko->getVy();
+    lectura.estado = yuuko->estadoActual();
+
+    DatosDisparo d;
+    if (goyeneche->ejecutar(dt, lectura, d)) {
+        Bala b;
+        b.fisica = new Proyectil(d.x0, d.y0, d.vx, d.vy, d.gravedad, d.id, 15);
+        b.yuukoSalto = false;
+        b.viva = true;
+
+        QColor color =Qt::black; //directo
+
+        if (d.tactica == Tactica::Predictivo) color = QColor(162, 0, 245 ); //morado
+
+        if (d.tactica == Tactica::Aereo) color = QColor(245, 110, 0 ); //naranja
+
+        b.dibujo = escena->addEllipse(-8, -8, 16, 16, QPen(Qt::NoPen), QBrush(color));
+
+        b.dibujo->setPos(d.x0, d.y0);
+        balas.push_back(b);
+    }
+    }
+
+void Nivel1::actualizarBalas(float dt){
+    for (int i = 0; i < balas.size(); i++) {
+        if (balas[i].viva == false) continue;
+        balas[i].fisica->actualizar(dt);
+        balas[i].dibujo->setPos(balas[i].fisica->getX(), balas[i].fisica->getY());
+        if (yuuko->getEnSuelo() == false) balas [i].yuukoSalto = true;
+        bool pego =balas[i].dibujo->collidesWithItem(dibujoYuuko);
+        bool salio = balas[i].fisica->getY() > ALTO + 20 || balas[i].fisica->getX() < -50 || balas[i].fisica->getX() > ANCHO + 50;
+
+        if (pego || salio) {
+            goyeneche->registrarResultado(balas[i].fisica->getId(), pego, balas[i].yuukoSalto);
+            if (pego) {
+                yuuko->recibirDano(balas[i].fisica->getDano());
+                sonar(Sonidos::Golpe);
+
+            }
+            delete balas[i].fisica;
+            delete balas[i].dibujo;
+            balas[i].fisica = nullptr;
+            balas[i].viva = false;
+        }
+        }
+
+    }
+
+
+
+    void Nivel1::actualizarLaminas(float dt) {
+        esperaLamina -= dt;
+        if (esperaLamina <= 0) {
+            esperaLamina = 2.5f;
+            LaminaTecho l;
+            float x = rand() % (int)(ANCHO - 60);
+            l.fisica = new Lamina(x, -20, GRAVEDAD, 2.0f, 10);
+            l.dibujo = escena->addRect(0,0,60,10,  QPen(Qt::NoPen), QBrush(QColor( 170, 170, 180)));
+            l.viva = true;
+            laminas.push_back(l);
+
+        }
+        for (int i = 0; i < laminas.size(); i++) {
+if (laminas[i].viva == false) continue;
+laminas[i].fisica->actualizar(dt);
+laminas[i].dibujo->setPos(laminas[i].fisica->getX(), laminas[i].fisica->getY());
+bool pego =laminas[i].dibujo->collidesWithItem(dibujoYuuko);
+if (pego) {
+    yuuko->recibirDano(laminas[i].fisica->getDano());
+    sonar(Sonidos::Golpe);
+
+}
+if (pego || laminas[i].fisica->getY() > ALTO) {
+    delete laminas[i].fisica;
+    delete laminas[i].dibujo;
+    laminas[i].fisica = nullptr;
+    laminas[i].viva = false;
+
+
+}
+}
+    }
+
+    void Nivel1::revisarTensores() {
+        for (int i = 0; i < tensores.size(); i++ ) {
+            if (tensores[i]->isVisible() && tensores[i]->collidesWithItem(dibujoYuuko) ) {
+                tensores[i]->hide();
+                tensoresQuitados++;
+                sonar(Sonidos::Logro);
+
+            }
+        }
+    }
+
+
+    void Nivel1::actualizarTexto() {
+        float  tension = tiempo / tiempoLimite;
+        barraTension->setRect(20,20,300 * tension, 18);
+        QString texto = "Tension del techo: " + QString::number((int)(tension *100)) + "%" + " Vida "
+                        + QString::number(yuuko->getPuntosDeSSalud()) + " Tensores: "
+                        + QString::number(tensoresQuitados) + "/5\n";
+
+        texto += "IA Goyeneche -> Directo " + QString::number(goyeneche->getAprendizaje().peso(Tactica::Directo), 'f', 2)
+                 + "  Predictivo " + QString::number(goyeneche->getAprendizaje().peso(Tactica::Predictivo), 'f', 2)
+                 + "  Aereo " + QString::number(goyeneche->getAprendizaje().peso(Tactica::Aereo), 'f', 2) + "\n";
+
+        if (tiempoMensaje > 0) texto += "MALA SUERTE!! TE CAYO ALGO EN LA CABEZA! (╯‵□′)╯︵┻━┻ ";
+        textoInfo->setPlainText(texto);
+
+
+    }
+
+
+
+
+
+
 
 
 
